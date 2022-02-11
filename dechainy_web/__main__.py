@@ -13,16 +13,21 @@
 # limitations under the License.
 import argparse
 import logging
-
 from importlib import import_module
 from importlib.util import find_spec
-from flask import Flask
 
 from dechainy.controller import Controller
+from flask import Flask
+
 from . import bp
 
 
 def _parse_arguments():
+    """Method to define and parse command line arguments.
+
+    Returns:
+        Dict[str, any]: The dictionary of arguments.
+    """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-a', '--address',
@@ -37,8 +42,9 @@ def _parse_arguments():
 
 
 def main():
-    """Function used when the module is called as main file. It provides, given the provided (or not)
-    startup file, a running Controller and optionally a REST server
+    """Method to run the main module, provided the defined arguments.
+    By default, a web server is created and all the routes belonging to
+    the available plugins are loaded.
     """
     args = _parse_arguments()
     ctr = Controller(log_level=logging._nameToLevel[args["log_level"]])
@@ -50,7 +56,6 @@ def main():
         if find_spec(target):
             module = import_module(target)
             app.register_blueprint(module.bp)
-    app.config['controller'] = ctr
     app.run(host=args["address"], port=args["port"],
             debug=args["debug"], use_reloader=False)
 
